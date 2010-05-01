@@ -1,3 +1,5 @@
+#include <math.h>
+
 #define FORCE_PIN 0
 
 #define RED 22
@@ -6,8 +8,31 @@
 #define YELLOW 28
 #define BLUE 30
 
+int minutes;
+int hours;
+
+int divideAndSetLED(int dividend, int LED)
+{
+  digitalWrite(LED, ((dividend%2)==1));
+  return dividend / 2;
+}
+
+void showseconds(int second)
+{
+  int remainder=second;
+  
+  remainder = divideAndSetLED(remainder, BLUE);
+  remainder = divideAndSetLED(remainder, YELLOW);
+  remainder = divideAndSetLED(remainder, GREEN);
+  remainder = divideAndSetLED(remainder, ORANGE);
+  divideAndSetLED(remainder, RED);
+}
+
 void setup()
 {
+  minutes=0;
+  hours=0;
+  
   pinMode(RED, OUTPUT);
   pinMode(ORANGE, OUTPUT);
   pinMode(GREEN, OUTPUT);
@@ -19,15 +44,20 @@ void setup()
 void loop()
 {
   int seconds=0;
-  
-  seconds = millis()/1000;
-  if (seconds > 0)
+  seconds = (millis()/1000) % 60;
+  if ((millis() > 1000) && (seconds==0))
   {
-    digitalWrite(BLUE, (seconds % 16) == 0);
-    digitalWrite(YELLOW, ((seconds % 8) == 0) && !((seconds % 16) == 0));
-    digitalWrite(GREEN, ((seconds % 4) == 0) && !((seconds % 8) == 0) && !((seconds % 16) == 0));
-    digitalWrite(ORANGE, ((seconds % 2) == 0) && !((seconds % 4) == 0) && !((seconds % 8) == 0) && !((seconds % 16) == 0));    
-    digitalWrite(RED, (seconds % 2) == 1);
-
+    minutes++;
+    if (minutes == 60)
+    {
+      minutes=0;
+      hours++;
+      if (hours==13)
+      {
+        hours=0;
+      }
+    }
   }
+  
+  showseconds(seconds);
 }
